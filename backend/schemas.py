@@ -46,3 +46,21 @@ class LocationBase(BaseModel):
     class Config:
         from_attributes = True
 
+class TimeSlotType(str, Enum):
+    SLOT_3H = "3H"
+    SLOT_5H = "5H"
+    SLOT_8H = "8H"
+    SLOT_12H = "12H"
+    SLOT_16H = "16H"
+    SLOT_24H = "24H"
+
+class TimeSlotAvailabilityResponse(BaseModel):
+    slot_type: TimeSlotType
+    available_bike_slots: int
+    available_car_slots: int
+
+class DetailedAvailabilityResponse(BaseModel):
+    location: str
+    date: date
+    slots: list[TimeSlotAvailabilityResponse]
+

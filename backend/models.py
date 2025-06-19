@@ -14,6 +14,14 @@ class BookingStatus(str, enum.Enum):
     ACTIVE = "active"
     CANCELLED = "cancelled"
 
+class TimeSlotType(str, enum.Enum):
+    SLOT_3H = "3H"
+    SLOT_5H = "5H"
+    SLOT_8H = "8H"
+    SLOT_12H = "12H"
+    SLOT_16H = "16H"
+    SLOT_24H = "24H"
+
 class ParkingLocation(Base):
     __tablename__ = "parking_locations"
 
@@ -45,4 +53,16 @@ class Availability(Base):
     date = Column(Date)
     available_cars = Column(Integer)
     available_two_wheelers = Column(Integer)
+
+class TimeSlotAvailability(Base):
+    __tablename__ = "time_slot_availability"
+
+    id = Column(Integer, primary_key=True, index=True)
+    location = Column(String(50), nullable=False)
+    date = Column(Date, nullable=False)
+    vehicle_type = Column(Enum(VehicleType), nullable=False)
+    slot_type = Column(Enum(TimeSlotType), nullable=False)
+    available_slots = Column(Integer, nullable=False)
+
+    # Unique constraint for (location, date, vehicle_type, slot_type) can be added for safety
 

@@ -128,36 +128,91 @@
     color: #333;
   }
 
+  .form-container {
+    max-width: 400px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    padding: 30px 24px 24px 24px;
+  }
+  h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 24px;
+  }
+  .form-group {
+    margin-bottom: 18px;
+  }
+  label {
+    display: block;
+    margin-bottom: 6px;
+    color: #34495e;
+    font-weight: 500;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  .submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .submit-btn:hover {
+    background: #0056b3;
+  }
+  .message {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 1rem;
+  }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Cancel Your Booking</h1>
+  <div class="form-container">
+    <h2>Cancel Booking</h2>
     <form id="cancelForm">
-      <label for="customer_id">Customer ID</label>
-      <input type="text" id="customer_id" name="customer_id" autocomplete="username" required>
-
-      <label for="name">Name</label>
-      <input type="text" id="name" name="name" autocomplete="name" required>
-
-      <label for="vehicle_number">Vehicle Number</label>
-      <input type="text" id="vehicle_number" name="vehicle_number" autocomplete="vehicle-registration" required>
-
-      <button type="submit">Cancel Booking</button>
+      <div class="form-group">
+        <label for="customer_id">Customer ID</label>
+        <input type="text" id="customer_id" name="customer_id" required />
+      </div>
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required />
+      </div>
+      <div class="form-group">
+        <label for="vehicle_number">Vehicle Number</label>
+        <input type="text" id="vehicle_number" name="vehicle_number" required />
+      </div>
+      <!-- Hidden fields for location, vehicle_type, slot_type, date -->
+      <input type="hidden" id="location" name="location" />
+      <input type="hidden" id="vehicle_type" name="vehicle_type" />
+      <input type="hidden" id="slot_type" name="slot_type" />
+      <input type="hidden" id="booking_date" name="booking_date" />
+      <button type="submit" class="submit-btn">Cancel Booking</button>
     </form>
-
-    <div id="cancelMessage"></div>
-<!-- Cancellation Popup -->
-<div id="cancelPopup" class="popup hidden">
-  <div class="popup-content">
-    <span id="closePopup" class="close">&times;</span>
-    <div id="popupMessage"></div>
-  </div>
-</div>
-    <div class="actions">
-      <a href="index.html"><button type="button">Back to Home</button></a>
-    </div>
+    <div id="cancelMessage" class="message"></div>
+    <button class="back-btn" onclick="window.location.href='index.html'" style="margin-top:16px;">Back to Home</button>
   </div>
   <script src="main.js"></script>
+  <script>
+    // Pre-fill hidden fields from query params
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('location').value = params.get('location') || '';
+    document.getElementById('vehicle_type').value = params.get('vehicle_type') || '';
+    document.getElementById('slot_type').value = params.get('slot_type') || '';
+    document.getElementById('booking_date').value = params.get('date') || '';
+  </script>
 </body>
 </html>

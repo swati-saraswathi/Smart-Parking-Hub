@@ -3,125 +3,90 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Book a Parking Slot</title>
+  <title>Book Parking Slot</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f8;
-      margin: 0;
-      padding: 0;
+    .form-container {
+      max-width: 400px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      padding: 30px 24px 24px 24px;
     }
-
-    .container {
-      max-width: 600px;
-      margin: 50px auto;
-      background-color: #fff;
-      padding: 30px 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
+    h2 {
       text-align: center;
-      margin-bottom: 25px;
-      color: #333;
+      color: #2c3e50;
+      margin-bottom: 24px;
     }
-
-    form {
-      display: flex;
-      flex-direction: column;
+    .form-group {
+      margin-bottom: 18px;
     }
-
     label {
-      margin-top: 15px;
-      font-weight: 600;
-      color: #333;
+      display: block;
+      margin-bottom: 6px;
+      color: #34495e;
+      font-weight: 500;
     }
-
-    input, select {
+    input[type="text"], input[type="number"] {
+      width: 100%;
       padding: 10px;
-      margin-top: 5px;
-      border-radius: 6px;
       border: 1px solid #ccc;
+      border-radius: 6px;
       font-size: 1rem;
     }
-
-    button {
-      margin-top: 25px;
+    .submit-btn {
+      width: 100%;
       padding: 12px;
-      background-color: #007BFF;
-      color: white;
-      font-size: 1rem;
+      background: #007bff;
+      color: #fff;
       border: none;
       border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: 600;
       cursor: pointer;
-      width :200px;
-      transition: background-color 0.3s ease;
-    
+      margin-top: 10px;
     }
-
-    button:hover {
-      background-color: #0056b3;
+    .submit-btn:hover {
+      background: #0056b3;
     }
-
-    #booking-message {
-      margin-top: 20px;
-      font-weight: 500;
+    .message {
+      margin-top: 18px;
       text-align: center;
-    }
-
-    a button {
-      background-color: #6c757d;
-      margin-top: 15px;
-    }
-
-    a button:hover {
-      background-color: #5a6268;
+      font-size: 1rem;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Book a Parking Slot</h1>
+  <div class="form-container">
+    <h2>Book Parking Slot</h2>
     <form id="bookingForm">
-      <label for="name">Customer Name:</label>
-      <input type="text" id="name" name="name" required>
-
-      <label for="location">Location:</label>
-      <select id="location" name="location" required>
-        <option value="">-- Select Location --</option>
-        <option value="Gandhipuram">Gandhipuram</option>
-        <option value="Singanallur">Singanallur</option>
-        <option value="Ukkadam">Ukkadam</option>
-        <option value="Ganapathy">Ganapathy</option>
-        <option value="RS Puram">RS Puram</option>
-      </select>
-
-      <label for="vehicleNumber">Vehicle Number:</label>
-      <input type="text" id="vehicleNumber" name="vehicleNumber" required>
-
-      <label for="vehicle_type">Vehicle Type:</label>
-      <select id="vehicle_type" name="vehicle_type" required>
-        <option value="">-- Select Type --</option>
-        <option value="CAR">Car</option>
-        <option value="TWO_WHEELER">Bike</option>
-      </select>
-
-      <label for="booking_date">Booking Date:</label>
-      <input type="date" id="booking_date" name="booking_date" required>
-
-      <label for="startTime">Start Time:</label>
-      <input type="time" id="startTime" name="startTime" required>
-
-      <label for="duration">Duration (in hours):</label>
-      <input type="number" id="duration" name="duration" min="1" max="24" required>
-
-      <button type="submit">Confirm Booking</button>
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required />
+      </div>
+      <div class="form-group">
+        <label for="vehicleNumber">Vehicle Number</label>
+        <input type="text" id="vehicleNumber" name="vehicleNumber" required />
+      </div>
+      <!-- Hidden fields for location, vehicle_type, slot_type, date -->
+      <input type="hidden" id="location" name="location" />
+      <input type="hidden" id="vehicle_type" name="vehicle_type" />
+      <input type="hidden" id="slot_type" name="slot_type" />
+      <input type="hidden" id="booking_date" name="booking_date" />
+      <button type="submit" class="submit-btn">Book Slot</button>
     </form>
-    <div id="booking-message"></div>
-    <a href="index.html"><button type="button">Back to Home</button></a>
+    <div id="booking-message" class="message"></div>
+    <button class="back-btn" onclick="window.location.href='index.html'" style="margin-top:16px;">Back to Home</button>
   </div>
   <script src="main.js"></script>
+  <script>
+    // Pre-fill hidden fields from query params
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('location').value = params.get('location') || '';
+    document.getElementById('vehicle_type').value = params.get('vehicle_type') || '';
+    document.getElementById('slot_type').value = params.get('slot_type') || '';
+    document.getElementById('booking_date').value = params.get('date') || '';
+  </script>
 </body>
 </html>

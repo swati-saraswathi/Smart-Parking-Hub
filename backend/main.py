@@ -57,6 +57,15 @@ def get_parking_availability(
 ):
     return crud.get_availability(db=db, target_date=query_date)
 
+@app.get("/availability/details", response_model=schemas.DetailedAvailabilityResponse)
+def get_detailed_availability(location: str, date: date = Query(...), db: Session = Depends(get_db)):
+    slots = crud.get_time_slot_availability(db, location, date)
+    return {
+        "location": location,
+        "date": date,
+        "slots": slots
+    }
+
 @app.post("/book")
 def book_slot(booking: schemas.BookingCreate, db: Session = Depends(get_db)):
     try:

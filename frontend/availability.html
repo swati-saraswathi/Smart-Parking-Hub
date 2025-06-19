@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Check Availability</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .slot-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+    .slot-table th, .slot-table td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    .slot-table th {
+      background: #f0f4f8;
+    }
+    .slot-table tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    .back-btn {
+      margin-top: 20px;
+      padding: 8px 16px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .back-btn:hover {
+      background: #0056b3;
+    }
+    .date-picker {
+      margin-top: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Check Slot Availability</h1>
+    <div id="location-title"></div>
+    <div class="date-picker">
+      <label for="avail-date">Select Date:</label>
+      <input type="date" id="avail-date"/>
+      <button id="check-btn">Check</button>
+    </div>
+    <div id="availability-container"></div>
+    <button class="back-btn" onclick="window.location.href='index.html'">Back to Home</button>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html> 
