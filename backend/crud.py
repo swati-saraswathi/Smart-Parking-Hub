@@ -5,7 +5,6 @@ from uuid import uuid4
 from datetime import date
 from .models import TimeSlotType
 
-
 def seed_default_locations(db: Session):
     if db.query(models.ParkingLocation).count() == 0:
         default_locations = [
@@ -17,7 +16,7 @@ def seed_default_locations(db: Session):
         ]
         db.add_all(default_locations)
         db.commit()
-        
+
 def get_all_locations(db: Session):
     return db.query(models.ParkingLocation).all()
 
@@ -36,6 +35,9 @@ def get_availability(db: Session, target_date: date):
     return result
 
 def create_booking(db: Session, booking: schemas.BookingCreate):
+    # Enforce required fields for zone, time_slot, seat_number
+    if not booking.zone or not booking.time_slot or not booking.seat_number:
+        raise ValueError("Zone, Time Slot, and Seat Number are required for booking.")
     location = db.query(models.ParkingLocation).filter_by(name=booking.location).first()
     if not location:
         raise ValueError("Location not found")
@@ -68,13 +70,13 @@ def create_booking(db: Session, booking: schemas.BookingCreate):
     if not slot:
         # Initialize with default split
         if booking.vehicle_type == "BIKE":
-            default_count = dict(
-                SLOT_3H=7, SLOT_5H=7, SLOT_8H=6, SLOT_12H=5, SLOT_16H=3, SLOT_24H=2
-            )[slot_type.value]
+            default_count = {
+                '3H': 7, '5H': 7, '8H': 6, '12H': 5, '16H': 3, '24H': 2
+            }[slot_type.value]
         else:
-            default_count = dict(
-                SLOT_3H=5, SLOT_5H=5, SLOT_8H=3, SLOT_12H=3, SLOT_16H=2, SLOT_24H=2
-            )[slot_type.value]
+            default_count = {
+                '3H': 5, '5H': 5, '8H': 3, '12H': 3, '16H': 2, '24H': 2
+            }[slot_type.value]
         slot = models.TimeSlotAvailability(
             location=booking.location,
             date=booking_date,
@@ -101,12 +103,31 @@ def create_booking(db: Session, booking: schemas.BookingCreate):
         booking_date=booking_date,
         booking_time=booking.booking_time,
         duration_hours=booking.duration_hours,
-        status=models.BookingStatus.ACTIVE
+        status=models.BookingStatus.ACTIVE,
+        zone=booking.zone if booking.zone else None,
+        time_slot=booking.time_slot if booking.time_slot else None,
+        seat_number=booking.seat_number if booking.seat_number else None
     )
     db.add(db_booking)
     db.commit()
     db.refresh(db_booking)
-    return db_booking
+    return {
+        "message": "Booking confirmed", 
+        "customer_id": db_booking.customer_id,
+        "booking_details": {
+            "customer_id": db_booking.customer_id,
+            "name": db_booking.name,
+            "location": db_booking.location,
+            "vehicle_type": db_booking.vehicle_type,
+            "vehicle_number": db_booking.vehicle_number,
+            "booking_date": str(db_booking.booking_date),
+            "booking_time": str(db_booking.booking_time),
+            "duration_hours": db_booking.duration_hours,
+            "zone": db_booking.zone,
+            "time_slot": db_booking.time_slot,
+            "seat_number": db_booking.seat_number
+        }
+    }
 
 def cancel_booking(db: Session, cancel: schemas.BookingCancel):
     booking = db.query(models.Booking).filter_by(
@@ -115,7 +136,7 @@ def cancel_booking(db: Session, cancel: schemas.BookingCancel):
         vehicle_number=cancel.vehicle_number,
         status=models.BookingStatus.ACTIVE
     ).first()
-    
+
     if not booking:
         raise ValueError("Booking not found")
 
@@ -149,21 +170,13 @@ def cancel_booking(db: Session, cancel: schemas.BookingCancel):
     booking.status = models.BookingStatus.CANCELLED
     db.commit()
     db.refresh(booking)
-            
+
     # Store booking details before delet
     return {
         "customer_id": booking.customer_id,
         "name": booking.name,
         "vehicle_number": booking.vehicle_number,
     }
-    
-    # Return a dict with the details since we can't return the deleted object
-    '''class BookingDetails:
-        def __init__(self, **kwargs):
-            for key, value in kwargs.items():
-                setattr(self, key, value)
-    
-    return BookingDetails(**booking_details)'''
 
 def get_time_slot_availability(db: Session, location: str, target_date: date):
     # Slot split as per requirements
@@ -205,3 +218,15 @@ def get_time_slot_availability(db: Session, location: str, target_date: date):
             "available_car_slots": car_slot.available_slots
         })
     return slots
+
+def get_booked_seats(db: Session, location: str, zone: str, time_slot: str, vehicle_type: str):
+    # Fetch booked seat numbers for given parameters
+    bookings = db.query(models.Booking).filter_by(
+        location=location,
+        zone=zone,
+        time_slot=time_slot,
+        vehicle_type=vehicle_type,
+        status=models.BookingStatus.ACTIVE
+    ).all()
+    booked_seats = [b.seat_number for b in bookings if b.seat_number]
+    return booked_seats

@@ -1,241 +1,324 @@
+/* General styles */
 body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  background-color: #f7f7f7;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f4f8;
 }
 
 .container {
-    max-width: 800px;
-    margin: auto;
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 20px;
+  text-align: center;
 }
 
 h1, h2 {
-  text-align: center;
   color: #2c3e50;
+  margin-bottom: 20px;
 }
 
-.location-card {
-  border: 1px solid #ccc;
-  padding: 20px;
-  border-radius: 12px;
-  margin: 10px 0;
-  background-color: #fff;
+/* Location buttons */
+.location-btn {
+  width: 100%;
+  max-width: 350px;
+  padding: 18px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 15px;
+}
+
+.location-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Zone buttons */
+.zone-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.zone-btn {
+  width: 100%;
+  max-width: 300px;
+  padding: 15px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+}
+
+.zone-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Back button */
+.back-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: background 0.2s;
 }
 
-.locations {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+.back-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Timing buttons */
+.timing-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.timing-btn {
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: background 0.2s;
+}
+
+.timing-btn:hover {
+  background-color: #0056b3;
+}
+
+.timing-btn.active {
+  background-color: #0056b3;
+}
+
+/* Vehicle buttons */
+.vehicle-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
   gap: 20px;
 }
 
-
-.lot {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #fafafa;
+.vehicle-btn {
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: background 0.2s;
 }
 
-.lot h3 {
-    margin: 0 0 10px;
-    color: #2980b9;
+.vehicle-btn:hover {
+  background-color: #1e7e34;
 }
 
-.actions {
-    display: flex;
-    justify-content: center;
-    margin-top: 30px;
-    gap: 20px;
+.vehicle-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
-button {
-    padding: 10px 20px;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
+/* Seat buttons */
+.seats-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
-button:hover {
-    background-color: #2980b9;
+.seat-btn {
+  width: 60px;
+  height: 60px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: background 0.2s;
 }
 
-#booking-message {
-    margin-top: 20px;
-    padding: 0;
-    border-radius: 10px;
+.seat-btn.booked {
+  background-color: #28a745;
+  cursor: not-allowed;
 }
 
-.message-box.success .success-message {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
+.seat-btn:hover:not(.booked) {
+  background-color: #0056b3;
 }
 
-.message-box.error .error-message {
-    background: linear-gradient(135deg, #ff6b6b, #ff5252);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
+.seat-btn.selected {
+  outline: 3px solid #ffc107;
 }
 
-.booking-id {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 15px;
-    border-radius: 8px;
-    margin: 15px 0;
-    font-size: 1.2rem;
-    font-weight: bold;
+/* Timing page styles */
+.timing-container {
+  max-width: 500px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  padding: 30px 24px 24px 24px;
+  text-align: center;
+}
+#time-split {
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #007bff;
+}
+.timing-btn {
+  margin: 8px 6px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: none;
+  background: #eee;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.timing-btn.active, .timing-btn:active {
+  background: #007bff;
+  color: #fff;
+}
+.vehicle-btn {
+  margin: 10px 16px 30px 16px;
+  padding: 16px 32px;
+  border-radius: 8px;
+  border: none;
+  background: #27ae60;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.vehicle-btn:disabled {
+  background: #b2bec3;
+  cursor: not-allowed;
+}
+.back-btn {
+  margin-top: 20px;
+  padding: 10px 24px;
+  background: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.back-btn:hover {
+  background: #217dbb;
 }
 
+/* Seat selection page styles */
+.seat-container {
+  max-width: 400px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  padding: 30px 24px 24px 24px;
+  text-align: center;
+}
+#seat-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.seat-btn {
+  padding: 12px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #eee;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.seat-btn.selected {
+  background: #007bff;
+  color: #fff;
+  font-weight: bold;
+}
+.seat-btn.seat-unavailable {
+  background: #b2bec3;
+  color: #fff;
+  cursor: not-allowed;
+}
+.proceed-btn {
+  width: 100%;
+  padding: 16px 0;
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.proceed-btn:disabled {
+  background: #b2bec3;
+  cursor: not-allowed;
+}
+
+/* Booking success popup styles */
+.popup-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.popup-content {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  padding: 32px 36px 28px 36px;
+  text-align: center;
+  min-width: 320px;
+}
 .booking-details {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 15px;
-    border-radius: 8px;
-    margin: 15px 0;
-    text-align: left;
+  text-align: left;
+  margin: 18px 0 24px 0;
+  font-size: 1.08rem;
 }
-
-.action-buttons {
-    margin-top: 15px;
-}
-
-.home-btn, .print-btn {
-    background: gray;
-    border: 2px solid white;
-    color: white;
-    padding: 10px 20px;
-    margin: 5px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.button.home-btn{
-    color:white;
-    background-color: #95a5a6;
-}
-
-/* Status indicators for parking availability */
-.available {
-    color: #27ae60;
-    font-weight: bold;
-}
-
-.full {
-    color: #e74c3c;
-    font-weight: bold;
-}
-
-/* Button styling */
-.button-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-    justify-content: center;
-}
-
-.book-btn {
-    background-color: #27ae60;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.book-btn:hover {
-    background-color: #219a52;
-}
-
-.book-btn:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-}
-
-.cancel-btn {
-    background-color: #e74c3c;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.cancel-btn:hover {
-    background-color: #c0392b;
-}
-
-/* Selected location display */
-.selected-location {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.selected-location h3 {
-    margin: 0 0 10px 0;
-    color: white;
-}
-
-.selected-location p {
-    margin: 0;
-    opacity: 0.8;
-}
-
-/* Form styling improvements */
-form {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-form label {
-    display: block;
-    margin-top: 15px;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #2c3e50;
-}
-
-form input, form select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-
-form input:focus, form select:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
-}
-
-/* Note styling */
-.note {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 10px;
-    border-radius: 5px;
-    margin: 10px 0;
-    font-style: italic;
+.popup-content h3 {
+  color: #27ae60;
+  margin-bottom: 12px;
 }

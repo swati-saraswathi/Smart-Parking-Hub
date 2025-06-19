@@ -69,11 +69,18 @@
         <label for="vehicleNumber">Vehicle Number</label>
         <input type="text" id="vehicleNumber" name="vehicleNumber" required />
       </div>
-      <!-- Hidden fields for location, vehicle_type, slot_type, date -->
+      <div class="form-group">
+        <label for="booking_date">Booking Date</label>
+        <!-- The min attribute will be set by JavaScript to restrict to future dates only -->
+        <input type="date" id="booking_date" name="booking_date" required />
+      </div>
+      <!-- Hidden fields for location, vehicle_type, slot_type, zone, time_slot, seat_number -->
       <input type="hidden" id="location" name="location" />
       <input type="hidden" id="vehicle_type" name="vehicle_type" />
       <input type="hidden" id="slot_type" name="slot_type" />
-      <input type="hidden" id="booking_date" name="booking_date" />
+      <input type="hidden" id="zone" name="zone" />
+      <input type="hidden" id="time_slot" name="time_slot" />
+      <input type="hidden" id="seat_number" name="seat_number" />
       <button type="submit" class="submit-btn">Book Slot</button>
     </form>
     <div id="booking-message" class="message"></div>
@@ -87,6 +94,9 @@
     document.getElementById('vehicle_type').value = params.get('vehicle_type') || '';
     document.getElementById('slot_type').value = params.get('slot_type') || '';
     document.getElementById('booking_date').value = params.get('date') || '';
+    document.getElementById('zone').value = params.get('zone') || '';
+    document.getElementById('time_slot').value = params.get('time_slot') || '';
+    document.getElementById('seat_number').value = params.get('seat_number') || '';
   </script>
 </body>
 </html>

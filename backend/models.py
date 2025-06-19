@@ -44,7 +44,10 @@ class Booking(Base):
     duration_hours = Column(Integer)
     status = Column(Enum(BookingStatus), default=BookingStatus.ACTIVE)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+    zone = Column(String(20), nullable = False)
+    time_slot = Column(String(30), nullable = False)
+    seat_number = Column(String(10), nullable = False)
+
 class Availability(Base):
     __tablename__ = "availability"
 
