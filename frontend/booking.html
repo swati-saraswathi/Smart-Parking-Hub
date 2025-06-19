@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book a Parking Slot</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background-color: #fff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-top: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    input, select {
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px;
+      background-color: #007BFF;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width :200px;
+      transition: background-color 0.3s ease;
+    
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #booking-message {
+      margin-top: 20px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    a button {
+      background-color: #6c757d;
+      margin-top: 15px;
+    }
+
+    a button:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Book a Parking Slot</h1>
+    <form id="bookingForm">
+      <label for="name">Customer Name:</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="location">Location:</label>
+      <select id="location" name="location" required>
+        <option value="">-- Select Location --</option>
+        <option value="Gandhipuram">Gandhipuram</option>
+        <option value="Singanallur">Singanallur</option>
+        <option value="Ukkadam">Ukkadam</option>
+        <option value="Ganapathy">Ganapathy</option>
+        <option value="RS Puram">RS Puram</option>
+      </select>
+
+      <label for="vehicleNumber">Vehicle Number:</label>
+      <input type="text" id="vehicleNumber" name="vehicleNumber" required>
+
+      <label for="vehicle_type">Vehicle Type:</label>
+      <select id="vehicle_type" name="vehicle_type" required>
+        <option value="">-- Select Type --</option>
+        <option value="CAR">Car</option>
+        <option value="TWO_WHEELER">Bike</option>
+      </select>
+
+      <label for="booking_date">Booking Date:</label>
+      <input type="date" id="booking_date" name="booking_date" required>
+
+      <label for="startTime">Start Time:</label>
+      <input type="time" id="startTime" name="startTime" required>
+
+      <label for="duration">Duration (in hours):</label>
+      <input type="number" id="duration" name="duration" min="1" max="24" required>
+
+      <button type="submit">Confirm Booking</button>
+    </form>
+    <div id="booking-message"></div>
+    <a href="index.html"><button type="button">Back to Home</button></a>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
