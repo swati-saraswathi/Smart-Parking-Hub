@@ -69,18 +69,14 @@
         <label for="vehicleNumber">Vehicle Number</label>
         <input type="text" id="vehicleNumber" name="vehicleNumber" required />
       </div>
-      <div class="form-group">
-        <label for="booking_date">Booking Date</label>
-        <!-- The min attribute will be set by JavaScript to restrict to future dates only -->
-        <input type="date" id="booking_date" name="booking_date" required />
-      </div>
-      <!-- Hidden fields for location, vehicle_type, slot_type, zone, time_slot, seat_number -->
+      <!-- Hidden fields for location, vehicle_type, slot_type, zone, time_slot, seat_number, booking_date -->
       <input type="hidden" id="location" name="location" />
       <input type="hidden" id="vehicle_type" name="vehicle_type" />
       <input type="hidden" id="slot_type" name="slot_type" />
       <input type="hidden" id="zone" name="zone" />
       <input type="hidden" id="time_slot" name="time_slot" />
       <input type="hidden" id="seat_number" name="seat_number" />
+      <input type="hidden" id="booking_date" name="booking_date" />
       <button type="submit" class="submit-btn">Book Slot</button>
     </form>
     <div id="booking-message" class="message"></div>

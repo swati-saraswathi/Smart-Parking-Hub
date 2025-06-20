@@ -45,6 +45,20 @@ def create_booking(db: Session, booking: schemas.BookingCreate):
     booking_date = booking.booking_time.date()
     booking.vehicle_type = "CAR" if booking.vehicle_type.lower() == "car" else "BIKE"
 
+    # Check if the specific seat is already booked for this location, zone, time_slot, and vehicle_type
+    existing_booking = db.query(models.Booking).filter_by(
+        location=booking.location,
+        zone=booking.zone,
+        time_slot=booking.time_slot,
+        seat_number=booking.seat_number,
+        vehicle_type=booking.vehicle_type,
+        booking_date=booking_date,
+        status=models.BookingStatus.ACTIVE
+    ).first()
+    
+    if existing_booking:
+        raise ValueError(f"Seat {booking.seat_number} is already booked for this time slot and zone.")
+
     # Map duration to slot type
     duration = booking.duration_hours
     if duration <= 3:
@@ -219,13 +233,14 @@ def get_time_slot_availability(db: Session, location: str, target_date: date):
         })
     return slots
 
-def get_booked_seats(db: Session, location: str, zone: str, time_slot: str, vehicle_type: str):
-    # Fetch booked seat numbers for given parameters
+def get_booked_seats(db: Session, location: str, zone: str, time_slot: str, vehicle_type: str, booking_date: date):
+    # Fetch booked seat numbers for given parameters including date
     bookings = db.query(models.Booking).filter_by(
         location=location,
         zone=zone,
         time_slot=time_slot,
         vehicle_type=vehicle_type,
+        booking_date=booking_date,
         status=models.BookingStatus.ACTIVE
     ).all()
     booked_seats = [b.seat_number for b in bookings if b.seat_number]

@@ -104,7 +104,7 @@ def get_timings(location: str, zone: str, db: Session = Depends(get_db)):
     return {"location": location, "zone": zone, "timings": slots}
 
 @app.get("/seats/{location}/{zone}/{time_slot}/{vehicle_type}", response_model=schemas.SeatAvailabilityResponse)
-def get_seats(location: str, zone: str, time_slot: str, vehicle_type: str, db: Session = Depends(get_db)):
+def get_seats(location: str, zone: str, time_slot: str, vehicle_type: str, date: date = Query(...), db: Session = Depends(get_db)):
     # For simplicity, define seat counts per zone and vehicle type
     seat_counts = {
         "zone1": {"BIKE": 8, "CAR": 5},
@@ -117,8 +117,8 @@ def get_seats(location: str, zone: str, time_slot: str, vehicle_type: str, db: S
     if total_seats == 0:
         raise HTTPException(status_code=404, detail="Invalid zone or vehicle type")
 
-    # Fetch booked seats for the given parameters
-    booked_seats = crud.get_booked_seats(db, location, zone, time_slot, vehicle_type.upper())
+    # Fetch booked seats for the given parameters including date
+    booked_seats = crud.get_booked_seats(db, location, zone, time_slot, vehicle_type.upper(), date)
 
     # Generate seat list with availability
     seats = []

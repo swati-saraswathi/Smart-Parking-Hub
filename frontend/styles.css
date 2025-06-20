@@ -10,15 +10,54 @@ body {
   max-width: 600px;
   margin: 40px auto;
   padding: 0 20px;
-  text-align: center;
 }
 
-h1, h2 {
+h1 {
+  text-align: center;
   color: #2c3e50;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  text-align: center;
+  color: #34495e;
+  margin-bottom: 30px;
+}
+
+/* Date section styles */
+.date-section {
+  text-align: center;
+  margin-bottom: 30px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.date-section label {
+  display: block;
+  margin-bottom: 10px;
+  color: #34495e;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.date-section input[type="date"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-width: 200px;
 }
 
 /* Location buttons */
+.locations {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
 .location-btn {
   width: 100%;
   max-width: 350px;
@@ -32,7 +71,6 @@ h1, h2 {
   cursor: pointer;
   transition: background 0.2s;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  margin-bottom: 15px;
 }
 
 .location-btn:hover {
@@ -166,6 +204,7 @@ h1, h2 {
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: background 0.2s;
+  position: relative;
 }
 
 .seat-btn.booked {
@@ -179,6 +218,51 @@ h1, h2 {
 
 .seat-btn.selected {
   outline: 3px solid #ffc107;
+}
+
+/* Unavailable seat styles */
+.seat-btn.unavailable {
+  background-color: #495057;
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.8;
+  box-shadow: none;
+  border: 2px solid #343a40;
+}
+
+.seat-btn.unavailable:hover {
+  background-color: #495057;
+  transform: none;
+  box-shadow: none;
+}
+
+.seat-btn.unavailable:disabled {
+  background-color: #495057;
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* Add a tooltip-like effect for unavailable seats */
+.seat-btn.unavailable::after {
+  content: "Booked";
+  position: absolute;
+  background: #343a40;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  bottom: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.seat-btn.unavailable:hover::after {
+  opacity: 1;
 }
 
 /* Timing page styles */

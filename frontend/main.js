@@ -2,7 +2,11 @@ const API_URL = "http://127.0.0.1:8000";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Load parking lots on index.html
-  if (document.getElementById("locations-container")) loadParkingLots();
+  if (document.getElementById("locations-container")) {
+    loadParkingLots();
+    // Set up date picker for index page
+    setupDatePicker();
+  }
 
   // Setup booking functionality
   if (document.getElementById("bookingForm")) setupBookingForm();
@@ -41,17 +45,23 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('zone').value = params.get('zone') || '';
     document.getElementById('time_slot').value = params.get('time_slot') || '';
     document.getElementById('seat_number').value = params.get('seat_number') || '';
-    // Set min date for booking_date to tomorrow
-    const bookingDateInput = document.getElementById('booking_date');
-    if (bookingDateInput) {
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-      const minDate = tomorrow.toISOString().split('T')[0];
-      bookingDateInput.min = minDate;
-    }
+    document.getElementById('booking_date').value = params.get('date') || '';
   }
 });
+
+// Setup date picker for index page
+function setupDatePicker() {
+  const dateInput = document.getElementById('booking-date');
+  if (dateInput) {
+    // Set minimum date to tomorrow
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
+    dateInput.min = minDate;
+    dateInput.value = minDate;
+  }
+}
 
 // Load all parking lot locations and their availability
 async function loadParkingLots() {
@@ -67,7 +77,13 @@ async function loadParkingLots() {
       btn.className = "location-btn";
       btn.textContent = lot.name;
       btn.onclick = () => {
-        window.location.href = `zone.html?location=${encodeURIComponent(lot.name)}`;
+        // Get the selected date from the date picker
+        const selectedDate = document.getElementById("booking-date").value;
+        if (!selectedDate) {
+          alert("Please select a booking date first");
+          return;
+        }
+        window.location.href = `zone.html?location=${encodeURIComponent(lot.name)}&date=${encodeURIComponent(selectedDate)}`;
       };
       container.appendChild(btn);
     });
@@ -81,6 +97,7 @@ async function loadParkingLots() {
 async function loadZones() {
   const urlParams = new URLSearchParams(window.location.search);
   const location = urlParams.get("location");
+  const date = urlParams.get("date");
   if (!location) {
     alert("No location specified");
     window.location.href = "index.html";
@@ -98,7 +115,7 @@ async function loadZones() {
       btn.className = "zone-btn";
       btn.textContent = zone.label;
       btn.onclick = () => {
-        window.location.href = `timings.html?location=${encodeURIComponent(location)}&zone=${zone.zone}`;
+        window.location.href = `timings.html?location=${encodeURIComponent(location)}&zone=${zone.zone}&date=${encodeURIComponent(date)}`;
       };
       container.appendChild(btn);
     });
@@ -130,7 +147,8 @@ function setupTimingsBackButton() {
     backBtn.addEventListener("click", () => {
       const urlParams = new URLSearchParams(window.location.search);
       const location = urlParams.get("location");
-      window.location.href = `zone.html?location=${encodeURIComponent(location)}`;
+      const date = urlParams.get("date");
+      window.location.href = `zone.html?location=${encodeURIComponent(location)}&date=${encodeURIComponent(date)}`;
     });
   }
 }
@@ -140,6 +158,7 @@ async function loadTimings() {
   const urlParams = new URLSearchParams(window.location.search);
   const location = urlParams.get("location");
   const zone = urlParams.get("zone");
+  const date = urlParams.get("date");
   if (!location || !zone) {
     alert("Missing location or zone");
     window.location.href = "index.html";
@@ -212,7 +231,8 @@ function goToSeats() {
   const urlParams = new URLSearchParams(window.location.search);
   const location = urlParams.get("location");
   const zone = urlParams.get("zone");
-  const url = `seats.html?location=${encodeURIComponent(location)}&zone=${encodeURIComponent(zone)}&time_slot=${encodeURIComponent(selectedTimeSlot)}&vehicle_type=${encodeURIComponent(selectedVehicle)}`;
+  const date = urlParams.get("date");
+  const url = `seats.html?location=${encodeURIComponent(location)}&zone=${encodeURIComponent(zone)}&time_slot=${encodeURIComponent(selectedTimeSlot)}&vehicle_type=${encodeURIComponent(selectedVehicle)}&date=${encodeURIComponent(date)}`;
   window.location.href = url;
 }
 
@@ -223,8 +243,9 @@ function setupBookingForm() {
   const zone = document.getElementById('zone')?.value;
   const time_slot = document.getElementById('time_slot')?.value;
   const seat_number = document.getElementById('seat_number')?.value;
-  if (!zone || !time_slot || !seat_number) {
-    alert("Zone, Time Slot, and Seat Number are required. Please start your booking from the beginning.");
+  const booking_date = document.getElementById('booking_date')?.value;
+  if (!zone || !time_slot || !seat_number || !booking_date) {
+    alert("Zone, Time Slot, Seat Number, and Booking Date are required. Please start your booking from the beginning.");
     window.location.href = "index.html";
     return;
   }
@@ -241,9 +262,9 @@ function setupBookingForm() {
     const seat_number = form.seat_number.value;
 
     // Block submission if any required field is missing
-    if (!zone || !time_slot || !seat_number) {
+    if (!zone || !time_slot || !seat_number || !booking_date) {
       const msg = document.getElementById("booking-message");
-      msg.innerHTML = `<span style='color:red'>Error: Zone, Time Slot, and Seat Number are required for booking.</span>`;
+      msg.innerHTML = `<span style='color:red'>Error: Zone, Time Slot, Seat Number, and Booking Date are required for booking.</span>`;
       return;
     }
 
@@ -288,6 +309,7 @@ function setupBookingForm() {
           customer_id: result.customer_id || (result.booking_details && result.booking_details.customer_id) || '',
           name: result.booking_details?.name || data.name,
           vehicle_number: result.booking_details?.vehicle_number || data.vehicle_number,
+          vehicle_type: result.booking_details?.vehicle_type || data.vehicle_type,
           booking_date: result.booking_details?.booking_date || data.booking_date,
           location: result.booking_details?.location || data.location,
           zone: result.booking_details?.zone || data.zone,
@@ -319,6 +341,7 @@ function showBookingPopup(details) {
         <p><strong>Customer ID:</strong> ${details.customer_id || ''}</p>
         <p><strong>Name:</strong> ${details.name}</p>
         <p><strong>Vehicle Number:</strong> ${details.vehicle_number}</p>
+        <p><strong>Vehicle Type:</strong> ${details.vehicle_type || ''}</p>
         <p><strong>Date:</strong> ${details.booking_date}</p>
         <p><strong>Location:</strong> ${details.location}</p>
         <p><strong>Zone:</strong> ${details.zone || ''}</p>
@@ -481,7 +504,8 @@ function setupSeatsPage() {
   const zone = urlParams.get("zone");
   const time_slot = urlParams.get("time_slot");
   const vehicle_type = urlParams.get("vehicle_type");
-  if (!location || !zone || !time_slot || !vehicle_type) {
+  const date = urlParams.get("date");
+  if (!location || !zone || !time_slot || !vehicle_type || !date) {
     alert("Missing seat selection parameters");
     window.location.href = "index.html";
     return;
@@ -490,44 +514,75 @@ function setupSeatsPage() {
   const proceedBtn = document.getElementById("proceed-btn");
   const backBtn = document.getElementById("back-to-timings");
 
-  // Determine seat count and labels
-  let seatCount = 0;
-  if (zone === "zone1" || zone === "zone2") {
-    seatCount = vehicle_type === "BIKE" ? 8 : 5;
-  } else if (zone === "zone3" || zone === "zone4") {
-    seatCount = vehicle_type === "BIKE" ? 6 : 4;
-  } else if (zone === "zone5") {
-    seatCount = 2;
-  }
-  // Generate seat labels: A1, A2, ...
-  const seatLabels = Array.from({ length: seatCount }, (_, i) => `A${i + 1}`);
+  // Show loading indicator
+  seatButtonsDiv.innerHTML = '<p style="text-align: center; color: #007bff; font-size: 1.1rem;">Loading seat availability...</p>';
+  proceedBtn.disabled = true;
 
+  // Fetch seat availability from backend
+  fetchSeatAvailability(location, zone, time_slot, vehicle_type, seatButtonsDiv, proceedBtn);
+  
+  backBtn.onclick = () => {
+    window.location.href = `timings.html?location=${encodeURIComponent(location)}&zone=${encodeURIComponent(zone)}&date=${encodeURIComponent(date)}`;
+  };
+}
+
+async function fetchSeatAvailability(location, zone, time_slot, vehicle_type, seatButtonsDiv, proceedBtn) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const date = urlParams.get("date");
+  
+  try {
+    const response = await fetch(`${API_URL}/seats/${encodeURIComponent(location)}/${encodeURIComponent(zone)}/${encodeURIComponent(time_slot)}/${encodeURIComponent(vehicle_type)}?date=${encodeURIComponent(date)}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch seat availability');
+    }
+    const data = await response.json();
+    
+    // Display seats with availability
+    displaySeats(data.seats, seatButtonsDiv, proceedBtn, location, zone, time_slot, vehicle_type);
+  } catch (error) {
+    console.error('Error fetching seat availability:', error);
+    seatButtonsDiv.innerHTML = '<p style="color:red">Failed to load seat availability. Please try again.</p>';
+  }
+}
+
+function displaySeats(seats, seatButtonsDiv, proceedBtn, location, zone, time_slot, vehicle_type) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const date = urlParams.get("date");
+  
   seatButtonsDiv.innerHTML = "";
   let selectedSeat = null;
-  seatLabels.forEach(label => {
+  
+  seats.forEach(seat => {
     const btn = document.createElement("button");
     btn.className = "seat-btn";
-    btn.textContent = label;
-    btn.onclick = () => {
-      document.querySelectorAll(".seat-btn").forEach(b => b.classList.remove("selected"));
-      btn.classList.add("selected");
-      selectedSeat = label;
-      proceedBtn.disabled = false;
-    };
+    btn.textContent = seat.seat_number;
+    
+    if (seat.is_booked) {
+      // Seat is already booked - make it unavailable
+      btn.classList.add("unavailable");
+      btn.disabled = true;
+      btn.title = "This seat is already booked";
+    } else {
+      // Seat is available - make it clickable
+      btn.onclick = () => {
+        document.querySelectorAll(".seat-btn:not(.unavailable)").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedSeat = seat.seat_number;
+        proceedBtn.disabled = false;
+      };
+    }
+    
     seatButtonsDiv.appendChild(btn);
   });
 
   proceedBtn.disabled = true;
   proceedBtn.onclick = () => {
     if (!selectedSeat) return;
-    // Always include zone, time_slot, and seat_number in the URL
-    if (!zone || !time_slot || !selectedSeat) {
-      alert("Zone, Time Slot, and Seat Number are required to proceed to booking.");
+    // Always include zone, time_slot, seat_number, and date in the URL
+    if (!zone || !time_slot || !selectedSeat || !date) {
+      alert("Zone, Time Slot, Seat Number, and Date are required to proceed to booking.");
       return;
     }
-    window.location.href = `booking.html?location=${encodeURIComponent(location)}&zone=${encodeURIComponent(zone)}&time_slot=${encodeURIComponent(time_slot)}&vehicle_type=${encodeURIComponent(vehicle_type)}&seat_number=${encodeURIComponent(selectedSeat)}`;
-  };
-  backBtn.onclick = () => {
-    window.location.href = `timings.html?location=${encodeURIComponent(location)}&zone=${encodeURIComponent(zone)}`;
+    window.location.href = `booking.html?location=${encodeURIComponent(location)}&zone=${encodeURIComponent(zone)}&time_slot=${encodeURIComponent(time_slot)}&vehicle_type=${encodeURIComponent(vehicle_type)}&seat_number=${encodeURIComponent(selectedSeat)}&date=${encodeURIComponent(date)}`;
   };
 }
