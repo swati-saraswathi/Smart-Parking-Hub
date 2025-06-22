@@ -166,17 +166,16 @@ async function loadTimings() {
   }
   const container = document.getElementById("timing-buttons");
   if (!container) return;
-
-  const zoneSplits = {
-    "zone1": "00:00-03:00, 03:00-06:00, 06:00-09:00, 09:00-12:00, 12:00-15:00, 15:00-18:00, 18:00-21:00, 21:00-00:00",
-    "zone2": "00:00-06:00, 06:00-12:00, 12:00-18:00, 18:00-00:00",
-    "zone3": "00:00-08:00, 08:00-16:00, 16:00-00:00",
-    "zone4": "00:00-12:00, 12:00-00:00",
-    "zone5": "00:00 (previous day) - 00:00 (next day)"
-  };
-
+  
+  // Clear previous content and show loading
+  container.innerHTML = "<p>Loading timings...</p>";
+  
   try {
     const response = await fetch(`${API_URL}/timings/${encodeURIComponent(location)}/${encodeURIComponent(zone)}`);
+    if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.detail || "Failed to load timings");
+    }
     const data = await response.json();
     container.innerHTML = "";
     data.timings.forEach(slot => {
@@ -188,13 +187,8 @@ async function loadTimings() {
       };
       container.appendChild(btn);
     });
-    const splitDiv = document.getElementById("time-split");
-    if (splitDiv) {
-      splitDiv.textContent = "Time Slot Split: " + (zoneSplits[zone] || "");
-      splitDiv.style.display = "block";
-    }
   } catch (error) {
-    alert("Failed to load timings");
+    container.innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
   }
 }
 
@@ -255,45 +249,28 @@ function setupBookingForm() {
     // Get hidden fields
     const location = form.location.value;
     const vehicle_type = form.vehicle_type.value;
-    const slot_type = form.slot_type.value;
-    const booking_date = form.booking_date.value;
+    const booking_date_str = form.booking_date.value; // Keep as string 'YYYY-MM-DD'
     const zone = form.zone.value;
     const time_slot = form.time_slot.value;
     const seat_number = form.seat_number.value;
 
     // Block submission if any required field is missing
-    if (!zone || !time_slot || !seat_number || !booking_date) {
+    if (!zone || !time_slot || !seat_number || !booking_date_str) {
       const msg = document.getElementById("booking-message");
       msg.innerHTML = `<span style='color:red'>Error: Zone, Time Slot, Seat Number, and Booking Date are required for booking.</span>`;
       return;
     }
 
-    // Map slot_type to duration_hours
-    const slotDurations = {
-      "SLOT_3H": 3,
-      "SLOT_5H": 5,
-      "SLOT_8H": 8,
-      "SLOT_12H": 12,
-      "SLOT_16H": 16,
-      "SLOT_24H": 24
-    };
-    const duration_hours = slotDurations[slot_type] || 3;
-
-    // Use 00:00 as start time for simplicity
-    const booking_time = `${booking_date}T00:00`;
-
     const data = {
       name: form.name.value,
-      location: location,
       vehicle_number: form.vehicleNumber.value,
       vehicle_type: vehicle_type,
-      booking_time: booking_time,
-      duration_hours: duration_hours,
+      location: location,
+      booking_date: booking_date_str,
       zone: zone,
       time_slot: time_slot,
-      seat_number: seat_number
+      seat_number: seat_number,
     };
-    console.log("data", data);
 
     try {
       const response = await fetch(`${API_URL}/book`, {
@@ -304,19 +281,8 @@ function setupBookingForm() {
       const result = await response.json();
       const msg = document.getElementById("booking-message");
       if (response.ok) {
-        // Show popup with all booking details from backend response if available
-        const details = {
-          customer_id: result.customer_id || (result.booking_details && result.booking_details.customer_id) || '',
-          name: result.booking_details?.name || data.name,
-          vehicle_number: result.booking_details?.vehicle_number || data.vehicle_number,
-          vehicle_type: result.booking_details?.vehicle_type || data.vehicle_type,
-          booking_date: result.booking_details?.booking_date || data.booking_date,
-          location: result.booking_details?.location || data.location,
-          zone: result.booking_details?.zone || data.zone,
-          time_slot: result.booking_details?.time_slot || data.time_slot,
-          seat_number: result.booking_details?.seat_number || data.seat_number
-        };
-        showBookingPopup(details);
+        // The backend now returns the full booking object.
+        showBookingPopup(result);
         form.reset();
       } else {
         msg.innerHTML = `❌ Error: ${result.detail || "Booking failed"}`;
@@ -338,15 +304,15 @@ function showBookingPopup(details) {
     <div class="popup-content">
       <h3>✅ Booking Successful!</h3>
       <div class="booking-details">
-        <p><strong>Customer ID:</strong> ${details.customer_id || ''}</p>
+        <p><strong>Customer ID:</strong> ${details.customer_id}</p>
         <p><strong>Name:</strong> ${details.name}</p>
         <p><strong>Vehicle Number:</strong> ${details.vehicle_number}</p>
-        <p><strong>Vehicle Type:</strong> ${details.vehicle_type || ''}</p>
+        <p><strong>Vehicle Type:</strong> ${details.vehicle_type}</p>
         <p><strong>Date:</strong> ${details.booking_date}</p>
         <p><strong>Location:</strong> ${details.location}</p>
-        <p><strong>Zone:</strong> ${details.zone || ''}</p>
-        <p><strong>Time Slot:</strong> ${details.time_slot || ''}</p>
-        <p><strong>Seat Number:</strong> ${details.seat_number || ''}</p>
+        <p><strong>Zone:</strong> ${details.zone}</p>
+        <p><strong>Time Slot:</strong> ${details.time_slot}</p>
+        <p><strong>Seat Number:</strong> ${details.seat_number}</p>
       </div>
       <button class="back-btn" onclick="window.location.href='index.html'">Back to Home</button>
     </div>
@@ -367,17 +333,14 @@ function setupCancellationForm() {
     submitButton.textContent = "Processing...";
     messageBox.innerHTML = "";
 
-    // Get hidden fields
-    const location = form.location.value;
-    const vehicle_type = form.vehicle_type.value;
-    const slot_type = form.slot_type.value;
-    const booking_date = form.booking_date.value;
-
-    const cancellationData = {
-      customer_id: form.customer_id.value.trim(),
-      name: form.name.value.trim(),
-      vehicle_number: form.vehicle_number.value.trim()
-    };
+    // Get customer ID only
+    const customer_id = form.customer_id.value.trim();
+    if (!customer_id) {
+      messageBox.innerHTML = `<span style='color:red'>Please enter your Customer ID.</span>`;
+      submitButton.disabled = false;
+      submitButton.textContent = "Cancel Booking";
+      return;
+    }
 
     try {
       const response = await fetch(`${API_URL}/cancel`, {
@@ -386,7 +349,7 @@ function setupCancellationForm() {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
-        body: JSON.stringify(cancellationData)
+        body: JSON.stringify({ customer_id })
       });
       const result = await response.json();
       if (!response.ok) {
@@ -397,10 +360,10 @@ function setupCancellationForm() {
           <h3>✅ Cancellation Successful!</h3>
           <div class="cancellation-details">
             <p><strong>Customer ID:</strong> ${result.customer_id}</p>
-            <p><strong>Name:</strong> ${result.name}</p>
-            <p><strong>Vehicle Number:</strong> ${result.vehicle_number}</p>
+            <p><strong>Name:</strong> ${result.name || ''}</p>
+            <p><strong>Vehicle Number:</strong> ${result.vehicle_number || ''}</p>
           </div>
-          <p>Your booking has been cancelled.</p>
+          <p>Your booking has been cancelled </p>
           <button onclick="window.location.href='index.html'" class="home-btn">Back to Home</button>
         </div>
       `;
@@ -410,7 +373,7 @@ function setupCancellationForm() {
         <div class="error-message">
           <h3>❌ Error</h3>
           <p>${err.message}</p>
-          <p>Please verify your details and try again.</p>
+          <p>Please verify your Customer ID and try again.</p>
         </div>
       `;
       messageBox.className = "message-box error";

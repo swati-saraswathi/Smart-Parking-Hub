@@ -51,16 +51,19 @@ h2 {
 }
 
 /* Location buttons */
-.locations {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-items: center;
+#locations-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px;
+  justify-items: center;
+  margin-top: 24px;
 }
 
 .location-btn {
+  min-width: 180px;
+  max-width: 250px;
   width: 100%;
-  max-width: 350px;
+  margin: 0;
   padding: 18px 0;
   font-size: 1.2rem;
   font-weight: 600;
@@ -405,4 +408,23 @@ h2 {
 .popup-content h3 {
   color: #27ae60;
   margin-bottom: 12px;
+}
+
+.cancel-btn {
+  width: 100%;
+  max-width: 350px;
+  padding: 14px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background-color: #dc3545;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-top: 30px;
+}
+.cancel-btn:hover {
+  background-color: #a71d2a;
 }

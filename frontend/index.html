@@ -15,10 +15,16 @@
       <input type="date" id="booking-date" name="booking-date" required />
     </div>
     <h2>Select a Parking Location</h2>
-    <div id="locations-container" class="locations">
+    <div id="locations-container">
       <!-- Location buttons injected by JS -->
     </div>
+    <button id="cancel-btn" class="cancel-btn" style="margin-top: 40px;">Cancel Booking</button>
   </div>
   <script src="main.js"></script>
+  <script>
+    document.getElementById('cancel-btn').onclick = function() {
+      window.location.href = 'cancel.html';
+    };
+  </script>
 </body>
 </html>

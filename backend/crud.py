@@ -1,247 +1,152 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from . import models, schemas
-from uuid import uuid4
-from datetime import date
-from .models import TimeSlotType
+from datetime import date, datetime
+import time
+import random
+import string
+
+# --- Static Configuration ---
+# This section centralizes the business logic for zones, time slots, and seat layouts.
+# This makes it easy to view and modify the parking structure without changing the core code.
+
+ZONES_CONFIG = {
+    "zone1": {"label": "Zone 1 (3-Hour Slots)", "time_slot_key": "3H"},
+    "zone2": {"label": "Zone 2 (6-Hour Slots)", "time_slot_key": "6H"},
+    "zone3": {"label": "Zone 3 (8-Hour Slots)", "time_slot_key": "8H"},
+    "zone4": {"label": "Zone 4 (12-Hour Slots)", "time_slot_key": "12H"},
+    "zone5": {"label": "Zone 5 (24-Hour Slot)", "time_slot_key": "24H"},
+}
+
+TIME_SLOTS_CONFIG = {
+    "3H": ["06:00-09:00", "09:00-12:00", "12:00-15:00", "15:00-18:00", "18:00-21:00", "21:00-00:00"],
+    "6H": ["00:00-06:00", "06:00-12:00", "12:00-18:00", "18:00-00:00"],
+    "8H": ["00:00-08:00", "08:00-16:00", "16:00-00:00"],
+    "12H": ["00:00-12:00", "12:00-00:00"],
+    "24H": ["Full Day (24 hours)"],
+}
+
+SEAT_CONFIG = {
+    "zone1": {"CAR": {"count": 10, "prefix": "A"}, "BIKE": {"count": 10, "prefix": "B"}},
+    "zone2": {"CAR": {"count": 10, "prefix": "C"}, "BIKE": {"count": 10, "prefix": "D"}},
+    "zone3": {"CAR": {"count": 10, "prefix": "E"}, "BIKE": {"count": 10, "prefix": "F"}},
+    "zone4": {"CAR": {"count": 10, "prefix": "G"}, "BIKE": {"count": 10, "prefix": "H"}},
+    "zone5": {"CAR": {"count": 10, "prefix": "I"}, "BIKE": {"count": 10, "prefix": "J"}},
+}
+
+# --- Helper Functions ---
+
+def _generate_seat_numbers(zone: str, vehicle_type: str):
+    config = SEAT_CONFIG.get(zone, {}).get(vehicle_type.upper())
+    if not config:
+        return []
+    return [f"{config['prefix']}{i+1}" for i in range(config['count'])]
+
+def _generate_customer_id():
+    """Generates a unique customer ID."""
+    timestamp = str(int(time.time() * 1000))[-6:]
+    random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+    return f"CUST-{timestamp}{random_chars}"
+
+# --- Seeding ---
 
 def seed_default_locations(db: Session):
+    """Seeds the database with 5 default locations if none exist."""
     if db.query(models.ParkingLocation).count() == 0:
         default_locations = [
-            models.ParkingLocation(name="Gandhipuram", two_wheeler_slots=30, car_slots=20),
-            models.ParkingLocation(name="Singanallur", two_wheeler_slots=30, car_slots=20),
-            models.ParkingLocation(name="Ukkadam", two_wheeler_slots=30, car_slots=20),
-            models.ParkingLocation(name="Ganapathy", two_wheeler_slots=30, car_slots=20),
-            models.ParkingLocation(name="RS Puram", two_wheeler_slots=30, car_slots=20),
+            models.ParkingLocation(name="Gandhipuram"),
+            models.ParkingLocation(name="Singanallur"),
+            models.ParkingLocation(name="Ukkadam"),
+            models.ParkingLocation(name="Ganapathy"),
+            models.ParkingLocation(name="RS Puram"),
         ]
         db.add_all(default_locations)
         db.commit()
 
+# --- Core CRUD Functions ---
+
 def get_all_locations(db: Session):
+    """Returns a list of all parking locations."""
     return db.query(models.ParkingLocation).all()
 
-def get_availability(db: Session, target_date: date):
-    lots = db.query(models.ParkingLocation).all()
-    result = []
-    for lot in lots:
-        car_booked = db.query(models.Booking).filter_by(location=lot.name, vehicle_type='car', booking_date=target_date).count()
-        tw_booked = db.query(models.Booking).filter_by(location=lot.name, vehicle_type='two_wheeler', booking_date=target_date).count()
-        result.append({
-            "location": lot.name,
-            "date": target_date,
-            "available_cars": lot.car_slots - car_booked,
-            "available_two_wheelers": lot.two_wheeler_slots - tw_booked
-        })
-    return result
+def get_zones_for_location(location: str):
+    """Returns the list of zones for a given location."""
+    # The zones are the same for all locations as per the current requirements.
+    return [schemas.Zone(zone=key, label=value["label"]) for key, value in ZONES_CONFIG.items()]
+    
+def get_timings_for_zone(zone: str):
+    """Returns the time slots available for a specific zone."""
+    time_slot_key = ZONES_CONFIG.get(zone, {}).get("time_slot_key")
+    if not time_slot_key:
+        return []
+    return TIME_SLOTS_CONFIG.get(time_slot_key, [])
+
+def get_seat_availability(db: Session, location: str, zone: str, time_slot: str, vehicle_type: str, booking_date: date):
+    """
+    Checks the booking table to determine which seats are available for the given criteria.
+    """
+    all_seats = _generate_seat_numbers(zone, vehicle_type)
+    if not all_seats:
+        raise HTTPException(status_code=404, detail="Invalid zone or vehicle type.")
+
+    booked_seats_query = db.query(models.Booking.seat_number).filter(
+        models.Booking.location == location,
+        models.Booking.zone == zone,
+        models.Booking.time_slot == time_slot,
+        models.Booking.vehicle_type == vehicle_type,
+        models.Booking.booking_date == booking_date,
+        models.Booking.status == models.BookingStatus.ACTIVE
+    )
+    booked_seats = {seat.seat_number for seat in booked_seats_query}
+
+    seat_availability = [
+        schemas.Seat(seat_number=seat, is_booked=(seat in booked_seats))
+        for seat in all_seats
+    ]
+    return schemas.SeatAvailabilityResponse(seats=seat_availability)
 
 def create_booking(db: Session, booking: schemas.BookingCreate):
-    # Enforce required fields for zone, time_slot, seat_number
-    if not booking.zone or not booking.time_slot or not booking.seat_number:
-        raise ValueError("Zone, Time Slot, and Seat Number are required for booking.")
-    location = db.query(models.ParkingLocation).filter_by(name=booking.location).first()
-    if not location:
-        raise ValueError("Location not found")
-
-    booking_date = booking.booking_time.date()
-    booking.vehicle_type = "CAR" if booking.vehicle_type.lower() == "car" else "BIKE"
-
-    # Check if the specific seat is already booked for this location, zone, time_slot, and vehicle_type
-    existing_booking = db.query(models.Booking).filter_by(
-        location=booking.location,
-        zone=booking.zone,
-        time_slot=booking.time_slot,
-        seat_number=booking.seat_number,
-        vehicle_type=booking.vehicle_type,
-        booking_date=booking_date,
-        status=models.BookingStatus.ACTIVE
+    """
+    Creates a new booking after validating seat availability.
+    """
+    # Final check to prevent race conditions
+    existing_booking = db.query(models.Booking).filter(
+        models.Booking.location == booking.location,
+        models.Booking.zone == booking.zone,
+        models.Booking.time_slot == booking.time_slot,
+        models.Booking.seat_number == booking.seat_number,
+        models.Booking.vehicle_type == booking.vehicle_type,
+        models.Booking.booking_date == booking.booking_date,
+        models.Booking.status == models.BookingStatus.ACTIVE
     ).first()
-    
+
     if existing_booking:
-        raise ValueError(f"Seat {booking.seat_number} is already booked for this time slot and zone.")
-
-    # Map duration to slot type
-    duration = booking.duration_hours
-    if duration <= 3:
-        slot_type = TimeSlotType.SLOT_3H
-    elif duration <= 5:
-        slot_type = TimeSlotType.SLOT_5H
-    elif duration <= 8:
-        slot_type = TimeSlotType.SLOT_8H
-    elif duration <= 12:
-        slot_type = TimeSlotType.SLOT_12H
-    elif duration <= 16:
-        slot_type = TimeSlotType.SLOT_16H
-    else:
-        slot_type = TimeSlotType.SLOT_24H
-
-    # Check or create time slot availability record
-    slot = db.query(models.TimeSlotAvailability).filter_by(
-        location=booking.location,
-        date=booking_date,
-        vehicle_type=booking.vehicle_type,
-        slot_type=slot_type
-    ).first()
-    if not slot:
-        # Initialize with default split
-        if booking.vehicle_type == "BIKE":
-            default_count = {
-                '3H': 7, '5H': 7, '8H': 6, '12H': 5, '16H': 3, '24H': 2
-            }[slot_type.value]
-        else:
-            default_count = {
-                '3H': 5, '5H': 5, '8H': 3, '12H': 3, '16H': 2, '24H': 2
-            }[slot_type.value]
-        slot = models.TimeSlotAvailability(
-            location=booking.location,
-            date=booking_date,
-            vehicle_type=booking.vehicle_type,
-            slot_type=slot_type,
-            available_slots=default_count
-        )
-        db.add(slot)
-        db.commit()
-        db.refresh(slot)
-
-    if slot.available_slots <= 0:
-        raise ValueError(f"No slots available for {booking.vehicle_type} in {slot_type.value} slot")
-    slot.available_slots -= 1
-    db.commit()
-    db.refresh(slot)
+        raise HTTPException(status_code=409, detail=f"Seat {booking.seat_number} is already booked for this time slot.")
 
     db_booking = models.Booking(
-        customer_id=str(uuid4())[:8],
-        name=booking.name,
-        vehicle_number=booking.vehicle_number,
-        location=booking.location,
-        vehicle_type=booking.vehicle_type,
-        booking_date=booking_date,
-        booking_time=booking.booking_time,
-        duration_hours=booking.duration_hours,
+        **booking.model_dump(),
+        customer_id=_generate_customer_id(),
         status=models.BookingStatus.ACTIVE,
-        zone=booking.zone if booking.zone else None,
-        time_slot=booking.time_slot if booking.time_slot else None,
-        seat_number=booking.seat_number if booking.seat_number else None
+        created_at=datetime.utcnow()
     )
     db.add(db_booking)
     db.commit()
     db.refresh(db_booking)
-    return {
-        "message": "Booking confirmed", 
-        "customer_id": db_booking.customer_id,
-        "booking_details": {
-            "customer_id": db_booking.customer_id,
-            "name": db_booking.name,
-            "location": db_booking.location,
-            "vehicle_type": db_booking.vehicle_type,
-            "vehicle_number": db_booking.vehicle_number,
-            "booking_date": str(db_booking.booking_date),
-            "booking_time": str(db_booking.booking_time),
-            "duration_hours": db_booking.duration_hours,
-            "zone": db_booking.zone,
-            "time_slot": db_booking.time_slot,
-            "seat_number": db_booking.seat_number
-        }
-    }
+    return db_booking
 
-def cancel_booking(db: Session, cancel: schemas.BookingCancel):
-    booking = db.query(models.Booking).filter_by(
-        customer_id=cancel.customer_id,
-        name=cancel.name,
-        vehicle_number=cancel.vehicle_number,
-        status=models.BookingStatus.ACTIVE
+def cancel_booking(db: Session, cancel_request: schemas.BookingCancel):
+    """
+    Cancels a booking by setting its status to CANCELLED.
+    """
+    booking = db.query(models.Booking).filter(
+        models.Booking.customer_id == cancel_request.customer_id,
+        models.Booking.status == models.BookingStatus.ACTIVE
     ).first()
 
     if not booking:
-        raise ValueError("Booking not found")
-
-    # Increment the correct slot in TimeSlotAvailability
-    # Map duration to slot type
-    duration = booking.duration_hours
-    if duration <= 3:
-        slot_type = TimeSlotType.SLOT_3H
-    elif duration <= 5:
-        slot_type = TimeSlotType.SLOT_5H
-    elif duration <= 8:
-        slot_type = TimeSlotType.SLOT_8H
-    elif duration <= 12:
-        slot_type = TimeSlotType.SLOT_12H
-    elif duration <= 16:
-        slot_type = TimeSlotType.SLOT_16H
-    else:
-        slot_type = TimeSlotType.SLOT_24H
-
-    slot = db.query(models.TimeSlotAvailability).filter_by(
-        location=booking.location,
-        date=booking.booking_date,
-        vehicle_type=booking.vehicle_type,
-        slot_type=slot_type
-    ).first()
-    if slot:
-        slot.available_slots += 1
-        db.commit()
-        db.refresh(slot)
+        raise HTTPException(status_code=404, detail="Active booking with this Customer ID not found.")
 
     booking.status = models.BookingStatus.CANCELLED
     db.commit()
     db.refresh(booking)
-
-    # Store booking details before delet
-    return {
-        "customer_id": booking.customer_id,
-        "name": booking.name,
-        "vehicle_number": booking.vehicle_number,
-    }
-
-def get_time_slot_availability(db: Session, location: str, target_date: date):
-    # Slot split as per requirements
-    slot_types = [
-        (TimeSlotType.SLOT_3H, 7, 5),
-        (TimeSlotType.SLOT_5H, 7, 5),
-        (TimeSlotType.SLOT_8H, 6, 3),
-        (TimeSlotType.SLOT_12H, 5, 3),
-        (TimeSlotType.SLOT_16H, 3, 2),
-        (TimeSlotType.SLOT_24H, 2, 2),
-    ]
-    slots = []
-    for slot_type, bike_count, car_count in slot_types:
-        # Bike
-        bike_slot = db.query(models.TimeSlotAvailability).filter_by(
-            location=location, date=target_date, vehicle_type=models.VehicleType.BIKE, slot_type=slot_type
-        ).first()
-        if not bike_slot:
-            bike_slot = models.TimeSlotAvailability(
-                location=location, date=target_date, vehicle_type=models.VehicleType.BIKE, slot_type=slot_type, available_slots=bike_count
-            )
-            db.add(bike_slot)
-            db.commit()
-            db.refresh(bike_slot)
-        # Car
-        car_slot = db.query(models.TimeSlotAvailability).filter_by(
-            location=location, date=target_date, vehicle_type=models.VehicleType.CAR, slot_type=slot_type
-        ).first()
-        if not car_slot:
-            car_slot = models.TimeSlotAvailability(
-                location=location, date=target_date, vehicle_type=models.VehicleType.CAR, slot_type=slot_type, available_slots=car_count
-            )
-            db.add(car_slot)
-            db.commit()
-            db.refresh(car_slot)
-        slots.append({
-            "slot_type": slot_type,
-            "available_bike_slots": bike_slot.available_slots,
-            "available_car_slots": car_slot.available_slots
-        })
-    return slots
-
-def get_booked_seats(db: Session, location: str, zone: str, time_slot: str, vehicle_type: str, booking_date: date):
-    # Fetch booked seat numbers for given parameters including date
-    bookings = db.query(models.Booking).filter_by(
-        location=location,
-        zone=zone,
-        time_slot=time_slot,
-        vehicle_type=vehicle_type,
-        booking_date=booking_date,
-        status=models.BookingStatus.ACTIVE
-    ).all()
-    booked_seats = [b.seat_number for b in bookings if b.seat_number]
-    return booked_seats
+    return booking
