@@ -48,6 +48,17 @@ def _generate_customer_id():
     random_chars = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
     return f"CUST-{timestamp}{random_chars}"
 
+def _calculate_amount(zone: str, vehicle_type: str) -> int:
+    # Pricing logic as per user requirements
+    pricing = {
+        'zone1': {'CAR': 50, 'BIKE': 25},
+        'zone2': {'CAR': 80, 'BIKE': 40},
+        'zone3': {'CAR': 100, 'BIKE': 60},
+        'zone4': {'CAR': 120, 'BIKE': 75},
+        'zone5': {'CAR': 150, 'BIKE': 90},
+    }
+    return pricing.get(zone, {}).get(vehicle_type.upper(), 0)
+
 # --- Seeding ---
 
 def seed_default_locations(db: Session):
@@ -123,8 +134,18 @@ def create_booking(db: Session, booking: schemas.BookingCreate):
     if existing_booking:
         raise HTTPException(status_code=409, detail=f"Seat {booking.seat_number} is already booked for this time slot.")
 
+    amount = _calculate_amount(booking.zone, booking.vehicle_type)
+    booking_data = booking.model_dump(exclude={"amount"})
     db_booking = models.Booking(
-        **booking.model_dump(),
+        name=booking_data["name"],
+        vehicle_number=booking_data["vehicle_number"],
+        vehicle_type=booking_data["vehicle_type"],
+        location=booking_data["location"],
+        booking_date=booking_data["booking_date"],
+        zone=booking_data["zone"],
+        time_slot=booking_data["time_slot"],
+        seat_number=booking_data["seat_number"],
+        amount=amount,
         customer_id=_generate_customer_id(),
         status=models.BookingStatus.ACTIVE,
         created_at=datetime.utcnow()

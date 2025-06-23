@@ -26,6 +26,7 @@ class BookingCancel(BaseModel):
 class BookingResponse(BookingBase):
     customer_id: str
     status: str
+    amount: int
     model_config = ConfigDict(from_attributes=True)
 
 class LocationResponse(BaseModel):

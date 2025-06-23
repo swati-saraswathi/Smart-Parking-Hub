@@ -301,7 +301,7 @@ function showBookingPopup(details) {
   popup.id = "booking-popup";
   popup.className = "popup-overlay";
   popup.innerHTML = `
-    <div class="popup-content">
+    <div class="popup-content" id="popup-content">
       <h3>✅ Booking Successful!</h3>
       <div class="booking-details">
         <p><strong>Customer ID:</strong> ${details.customer_id}</p>
@@ -313,11 +313,50 @@ function showBookingPopup(details) {
         <p><strong>Zone:</strong> ${details.zone}</p>
         <p><strong>Time Slot:</strong> ${details.time_slot}</p>
         <p><strong>Seat Number:</strong> ${details.seat_number}</p>
+        <p><strong>Amount:</strong> Rs. ${details.amount}</p>
       </div>
+      <button class="print-btn" style="background:#28a745;color:#fff;margin-top:10px;margin-bottom:10px;padding:10px 20px;border:none;border-radius:5px;font-size:1rem;cursor:pointer;" onclick="printReceipt()">Print</button>
+      <button class="pdf-btn" style="background:#218838;color:#fff;margin-left:10px;margin-top:10px;margin-bottom:10px;padding:10px 20px;border:none;border-radius:5px;font-size:1rem;cursor:pointer;" id="download-pdf-btn">Download PDF</button>
       <button class="back-btn" onclick="window.location.href='index.html'">Back to Home</button>
     </div>
   `;
   document.body.appendChild(popup);
+  // Attach PDF download event
+  document.getElementById('download-pdf-btn').onclick = function() { downloadReceiptPDF(details); };
+}
+
+// Print only the popup content
+function printReceipt() {
+  const printContents = document.getElementById('popup-content').innerHTML;
+  const originalContents = document.body.innerHTML;
+  document.body.innerHTML = printContents;
+  window.print();
+  document.body.innerHTML = originalContents;
+  window.location.reload(); // reload to restore event listeners and state
+}
+
+// Download PDF receipt using jsPDF
+function downloadReceiptPDF(details) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y = 15;
+  doc.setFontSize(18);
+  doc.setTextColor(40, 167, 69);
+  doc.text('Booking Receipt', 105, y, { align: 'center' });
+  y += 10;
+  doc.setFontSize(12);
+  doc.setTextColor(0,0,0);
+  doc.text(`Customer ID: ${details.customer_id}`, 15, y += 12);
+  doc.text(`Name: ${details.name}`, 15, y += 10);
+  doc.text(`Vehicle Number: ${details.vehicle_number}`, 15, y += 10);
+  doc.text(`Vehicle Type: ${details.vehicle_type}`, 15, y += 10);
+  doc.text(`Date: ${details.booking_date}`, 15, y += 10);
+  doc.text(`Location: ${details.location}`, 15, y += 10);
+  doc.text(`Zone: ${details.zone}`, 15, y += 10);
+  doc.text(`Time Slot: ${details.time_slot}`, 15, y += 10);
+  doc.text(`Seat Number: ${details.seat_number}`, 15, y += 10);
+  doc.text(`Amount: Rs. ${details.amount}`, 15, y += 10);
+  doc.save(`Parking_Receipt_${details.customer_id}.pdf`);
 }
 
 // Cancellation form functionality

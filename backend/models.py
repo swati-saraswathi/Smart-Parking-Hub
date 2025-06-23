@@ -32,6 +32,7 @@ class Booking(Base):
     zone = Column(String(20), nullable=False)
     time_slot = Column(String(30), nullable=False)
     seat_number = Column(String(10), nullable=False)
+    amount = Column(Integer, nullable=False)
     status = Column(Enum(BookingStatus), default=BookingStatus.ACTIVE)
     created_at = Column(DateTime, default=datetime.utcnow)
 
