@@ -73,7 +73,7 @@ def seed_default_locations(db: Session):
         ]
         db.add_all(default_locations)
         db.commit()
-
+        
 # --- Core CRUD Functions ---
 
 def get_all_locations(db: Session):
@@ -163,10 +163,10 @@ def cancel_booking(db: Session, cancel_request: schemas.BookingCancel):
         models.Booking.customer_id == cancel_request.customer_id,
         models.Booking.status == models.BookingStatus.ACTIVE
     ).first()
-
+    
     if not booking:
         raise HTTPException(status_code=404, detail="Active booking with this Customer ID not found.")
-
+            
     booking.status = models.BookingStatus.CANCELLED
     db.commit()
     db.refresh(booking)

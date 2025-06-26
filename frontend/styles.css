@@ -1,26 +1,54 @@
 /* General styles */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
-  background-color: #f0f4f8;
+  /* Background image (replace 'parking-bg.jpg' with your image path) */
+  background: url('car.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #22223B;
 }
 
-.container {
-  max-width: 600px;
+/* Overlay for low transparency effect */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(34, 34, 59, 0.65);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Ensure all content is above the overlay */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+.container, .timing-container, .seat-container {
+  background: #F7F7FF;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(79, 138, 139, 0.10);
+  padding: 32px 28px 28px 28px;
   margin: 40px auto;
-  padding: 0 20px;
+  max-width: 600px;
+}
+
+h1, h2, h3 {
+  color: #4F8A8B;
+  font-weight: 800;
+  letter-spacing: 1px;
 }
 
 h1 {
   text-align: center;
-  color: #2c3e50;
   margin-bottom: 10px;
 }
 
 h2 {
   text-align: center;
-  color: #34495e;
   margin-bottom: 30px;
 }
 
@@ -28,26 +56,32 @@ h2 {
 .date-section {
   text-align: center;
   margin-bottom: 30px;
-  background: #fff;
+  background: #e4e4c0;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(79, 138, 139, 0.08);
 }
 
 .date-section label {
   display: block;
   margin-bottom: 10px;
-  color: #34495e;
-  font-weight: 500;
-  font-size: 1.1rem;
+  color: #22223B;
+  font-weight: 600;
 }
 
 .date-section input[type="date"] {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  min-width: 200px;
+  padding: 12px;
+  border: 2px solid #4F8A8B;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  background: #fff;
+  color: #22223B;
+  transition: border 0.2s;
+}
+
+.date-section input[type="date"]:focus {
+  border: 2px solid #F9ED69;
+  outline: none;
 }
 
 /* Location buttons */
@@ -80,57 +114,125 @@ h2 {
   background-color: #0056b3;
 }
 
+.zone-btn, .timing-btn, .proceed-btn, .back-btn, .cancel-btn, .print-btn, .pdf-btn, .home-btn {
+  font-family: inherit;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(79, 138, 139, 0.08);
+
+}
+
+.zone-btn, .timing-btn, .proceed-btn, .print-btn, .pdf-btn, .back-btn, .home-btn {
+  background: #4F8A8B;
+  color: #fff;
+  padding: 16px 0;
+  font-size: 1.15rem;
+  margin-bottom: 10px;
+  width: 200px;
+}
+
+.zone-btn:hover, .timing-btn:hover, .proceed-btn:hover, .print-btn:hover, .pdf-btn:hover, .back-btn:hover, .home-btn:hover {
+  background: #357376;
+  color: #fcfcfc;
+  transform: translateY(-2px) scale(1.03);
+}
+
+.vehicle-btn {
+  background: #F9ED69;
+  color: #4F8A8B;
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  margin: 10px 16px 30px 16px;
+}
+
+.vehicle-btn:hover {
+  background: #fffbe0;
+  color: #22223B;
+}
+
+.vehicle-btn:disabled {
+  background: #e0e0e0;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: #F45B69;
+  color: #fff;
+  padding: 14px 0;
+  font-size: 1.1rem;
+  margin-top: 30px;
+  width: 200px;
+}
+
+.cancel-btn:hover {
+  background: #c0392b;
+  color: #fff;
+}
+
+.proceed-btn {
+  background: #43AA8B;
+  color: #fff;
+  font-size: 1.2rem;
+  padding: 16px 0;
+  margin-bottom: 18px;
+}
+
+.proceed-btn:disabled {
+  background: #657881;
+  color: #fff;
+  cursor: not-allowed;
+}
+
 /* Zone buttons */
 .zone-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+  justify-items: center;
+  align-items: stretch;
+  background: rgba(249, 237, 105, 0.12); /* subtle accent background */
+  padding: 32px 16px;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(79, 138, 139, 0.10);
+  margin-bottom: 32px;
 }
 
 .zone-btn {
   width: 100%;
-  max-width: 300px;
-  padding: 15px 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 10px;
-  background-color: #007bff;
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  transition: background 0.2s;
+  min-width: 180px;
+  max-width: 320px;
+  padding: 28px 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-radius: 16px;
+  background: #fff;
+  color: #4F8A8B;
+  border: 2px solid #4F8A8B;
+  box-shadow: 0 2px 12px rgba(79, 138, 139, 0.08);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
+  margin-bottom: 0;
+  letter-spacing: 1px;
+  position: relative;
 }
-
 .zone-btn:hover {
-  background-color: #0056b3;
-}
-
-/* Back button */
-.back-btn {
-  margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: background 0.2s;
-}
-
-.back-btn:hover {
-  background-color: #0056b3;
+  background: #4F8A8B;
+  color: #ffffff;
+  box-shadow: 0 4px 18px rgba(79, 138, 139, 0.18);
+  transform: translateY(-2px) scale(1.04);
+  border-color: #494947;
 }
 
 /* Timing buttons */
 .timing-list {
   display: flex;
   flex-wrap: wrap;
+  background-color: #65e2f8;
   gap: 12px;
+  font-palette: #007bff;
   justify-content: center;
   margin-bottom: 20px;
 }
@@ -142,7 +244,7 @@ h2 {
   border: none;
   border-radius: 8px;
   background-color: #007bff;
-  color: white;
+  color: rgb(0, 0, 0);
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: background 0.2s;
@@ -170,10 +272,10 @@ h2 {
   font-weight: 700;
   border: none;
   border-radius: 10px;
-  background-color: #28a745;
-  color: white;
+  background-color: #c784f4;
+  color: rgb(248, 129, 200);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
   transition: background 0.2s;
 }
 
@@ -182,7 +284,7 @@ h2 {
 }
 
 .vehicle-btn:disabled {
-  background-color: #ccc;
+  background-color: #df92f9;
   cursor: not-allowed;
 }
 
@@ -200,59 +302,35 @@ h2 {
   height: 60px;
   font-size: 1.1rem;
   font-weight: 700;
-  border: none;
-  border-radius: 8px;
-  background-color: #007bff;
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: background 0.2s;
+  background: #fff;
+  color: #4F8A8B;
+  border: 2px solid #F9ED69;
+  box-shadow: 0 2px 6px rgba(79, 138, 139, 0.10);
   position: relative;
-}
-
-.seat-btn.booked {
-  background-color: #28a745;
-  cursor: not-allowed;
-}
-
-.seat-btn:hover:not(.booked) {
-  background-color: #0056b3;
+  margin-bottom: 0;
 }
 
 .seat-btn.selected {
-  outline: 3px solid #ffc107;
+  background: #4F8A8B;
+  color: #fff;
+  border: 2px solid #F9ED69;
+  outline: 3px solid #F9ED69;
 }
 
-/* Unavailable seat styles */
-.seat-btn.unavailable {
-  background-color: #495057;
-  color: #ffffff;
+.seat-btn.unavailable, .seat-btn.seat-unavailable, .seat-btn.booked {
+  background: #b2bec3;
+  color: #fff;
+  border: 2px solid #aaa;
   cursor: not-allowed;
-  opacity: 0.8;
-  box-shadow: none;
-  border: 2px solid #343a40;
+  opacity: 0.7;
 }
 
-.seat-btn.unavailable:hover {
-  background-color: #495057;
-  transform: none;
-  box-shadow: none;
-}
-
-.seat-btn.unavailable:disabled {
-  background-color: #495057;
-  color: #ffffff;
-  cursor: not-allowed;
-  opacity: 0.8;
-}
-
-/* Add a tooltip-like effect for unavailable seats */
-.seat-btn.unavailable::after {
+.seat-btn.unavailable::after, .seat-btn.booked::after {
   content: "Booked";
   position: absolute;
-  background: #343a40;
-  color: white;
-  padding: 2px 6px;
+  background: #F45B69;
+  color: #fff;
+  padding: 2px 8px;
   border-radius: 4px;
   font-size: 0.7rem;
   bottom: -25px;
@@ -264,7 +342,7 @@ h2 {
   pointer-events: none;
 }
 
-.seat-btn.unavailable:hover::after {
+.seat-btn.unavailable:hover::after, .seat-btn.booked:hover::after {
   opacity: 1;
 }
 
@@ -325,6 +403,7 @@ h2 {
 }
 .back-btn:hover {
   background: #217dbb;
+  color: #fff;
 }
 
 /* Seat selection page styles */
@@ -386,7 +465,7 @@ h2 {
 .popup-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.3);
+  background: rgba(34, 34, 59, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -394,37 +473,78 @@ h2 {
 }
 .popup-content {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-  padding: 32px 36px 28px 36px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(79, 138, 139, 0.18);
+  padding: 36px 40px 32px 40px;
   text-align: center;
   min-width: 320px;
+}
+.popup-content h3 {
+  color: #43AA8B;
+  margin-bottom: 12px;
 }
 .booking-details {
   text-align: left;
   margin: 18px 0 24px 0;
   font-size: 1.08rem;
 }
-.popup-content h3 {
-  color: #27ae60;
-  margin-bottom: 12px;
+
+/* --- Table Styles (Availability) --- */
+.slot-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(79, 138, 139, 0.08);
+  margin-bottom: 24px;
+}
+.slot-table th, .slot-table td {
+  padding: 14px 10px;
+  text-align: center;
+  border-bottom: 1px solid #F9ED69;
+}
+.slot-table th {
+  background: #4F8A8B;
+  color: #fff;
+  font-weight: 700;
+}
+.slot-table tr:last-child td {
+  border-bottom: none;
 }
 
-.cancel-btn {
-  width: 100%;
-  max-width: 350px;
-  padding: 14px 0;
+/* --- Input Styles --- */
+input[type="text"], input[type="number"], input[type="date"], input[type="password"], select {
+  padding: 12px;
+  border: 2px solid #4F8A8B;
+  border-radius: 8px;
   font-size: 1.1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 10px;
-  background-color: #dc3545;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  margin-top: 30px;
+  background: #fff;
+  color: #22223B;
+  margin-bottom: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border 0.2s;
 }
-.cancel-btn:hover {
-  background-color: #a71d2a;
+input:focus, select:focus {
+  border: 2px solid #F9ED69;
+  outline: none;
 }
+
+/* --- Misc --- */
+.success-message h3 {
+  color: #43AA8B;
+}
+.error-message h3 {
+  color: #F45B69;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  background: #F7F7FF;
+}
+::-webkit-scrollbar-thumb {
+  background: #4F8A8B;
+  border-radius: 8px;
+}
+
+.location-btn-content, .location-icon, .location-name { display: unset !important; background: unset !important; box-shadow: unset !important; border-radius: unset !important; margin-right: unset !important; gap: unset !important; width: unset !important; height: unset !important; color: unset !important; font-size: unset !important; font-weight: unset !important; text-align: unset !important; justify-content: unset !important; align-items: unset !important; }
