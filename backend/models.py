@@ -12,6 +12,13 @@ class VehicleType(str, enum.Enum):
 class BookingStatus(str, enum.Enum):
     ACTIVE = "active"
     CANCELLED = "cancelled"
+    
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50))
+    email = Column(String(100))
 
 class ParkingLocation(Base):
     __tablename__ = "parking_locations"

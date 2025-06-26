@@ -7,7 +7,7 @@ from datetime import date
 from typing import List
 
 from . import models, schemas, crud
-from .database import SessionLocal, engine
+from .database import Base, SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
